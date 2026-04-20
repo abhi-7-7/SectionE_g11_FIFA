@@ -20,7 +20,7 @@ Which factors — home advantage, match stage, team historical performance, and 
 | WorldCupMatches.csv | 4,572 | 20 | Match-level data with scores, attendance, referees |
 | WorldCups.csv | 20 | 10 | Tournament-level summary per edition |
 
-**Primary analytical dataset:** `data/processed/wc_master.csv` — a merged, cleaned dataset combining all three sources (37,784 rows × 22+ columns), created by the ETL pipeline.
+**Primary analytical dataset:** `data/processed/wc_schedule_analysis.csv` — a merged, cleaned dataset combining all three sources (37,784 rows × 15 columns), created by the ETL pipeline.
 
 **Source:** [Kaggle — FIFA World Cup](https://www.kaggle.com/datasets/abecklas/fifa-world-cup)
 
@@ -196,7 +196,7 @@ jupyter lab
 
 ## Analysis Outputs & Insights
 
-### **Data Quality Metrics (from test.py)**
+### Data Quality Metrics
 
 | Metric | Value |
 |--------|-------|
@@ -204,22 +204,21 @@ jupyter lab
 | Null Values | 0 |
 | Data Consistency | 100% |
 | Memory Size | 22.66 MB |
-| Processing Time | <5 seconds |
 
-### **Descriptive Analytics**
+### Descriptive Analytics
 
-#### Teams & Venues
+#### Teams and Venues
 - **Unique Teams:** 83 national teams
 - **Unique Venues:** 151 cities across 15 host nations
 - **Tournaments:** 20 World Cups (1930-2014)
 
 #### Match Statistics
-| Outcome | Count | % |
-|---------|-------|---|
-| Home Wins | 21,479 | 56.8% |
-| Away Wins | 7,834 | 20.7% |
-| Draws | 8,471 | 22.4% |
-| **Total Unique Matches** | 828 | — |
+| Outcome | Count | Notes |
+|---------|-------|-------|
+| Home Wins | 21,479 | Player-level records after merge |
+| Away Wins | 7,834 | Player-level records after merge |
+| Draws | 8,471 | Player-level records after merge |
+| **Total Unique Matches** | 828 | Use this for true match-level analysis |
 
 #### Goal Scoring
 - **Total Goals Scored:** 2,194
@@ -240,12 +239,26 @@ jupyter lab
 - **Minimum:** 2,000
 - **Attendance Std Dev:** 23,256 (high variability)
 
+#### Attendance KPI Snapshot
+
+The file [tableau/kpi_attendance.csv](tableau/kpi_attendance.csv) shows long-term attendance growth across World Cups.
+
+| Year | Attendance | Matches Played | Avg. Attendance per Match |
+|------|------------|----------------|---------------------------|
+| 1930 | 590,549 | 18 | 32,808 |
+| 1950 | 1,045,246 | 22 | 47,511 |
+| 1966 | 1,563,135 | 32 | 48,848 |
+| 1994 | 3,587,538 | 52 | 68,991 |
+| 2014 | 3,386,810 | 64 | 52,919 |
+
+Key pattern: attendance per tournament generally increased over time, and matches played expanded from 18 to 64.
+
 ---
 
-## Analysis Deliverables & Expected Outputs
+## Analysis Deliverables and Expected Outputs
 
-### **Phase 1: Exploratory Data Analysis (EDA)**
-**File:** `notebooks/03_eda.ipynb`
+### Phase 1: Exploratory Data Analysis
+File: notebooks/03_eda.ipynb
 
 **Expected Outputs:**
 1. **Distribution Analysis**
@@ -272,8 +285,8 @@ jupyter lab
    - Stage vs Average Goals
    - Year vs Attendance trends
 
-### **Phase 2: Statistical Analysis & Hypothesis Testing**
-**File:** `notebooks/04_statistical_analysis.ipynb`
+### Phase 2: Statistical Analysis and Hypothesis Testing
+File: notebooks/04_statistical_analysis.ipynb
 
 **Expected Outputs:**
 1. **Inferential Statistics**
@@ -295,8 +308,8 @@ jupyter lab
    - ✓ Which teams are most consistent?
    - ✓ How has player disciplinary evolved?
 
-### **Phase 3: KPI Computation & Tableau Prep**
-**File:** `notebooks/05_final_load_prep.ipynb`
+### Phase 3: KPI Computation and Tableau Prep
+File: notebooks/05_final_load_prep.ipynb
 
 **Expected Outputs:**
 1. **Pre-computed KPIs** (ready for dashboard)
@@ -325,36 +338,36 @@ jupyter lab
 
 ---
 
-## What's Necessary for Complete Analysis
+## What Is Necessary for Complete Analysis
 
-### **✅ Currently Complete**
+### Currently Complete
 - [x] Environment setup (Conda + requirements)
 - [x] ETL pipeline (extraction, cleaning, transformation)
 - [x] Data validation & quality checks
 - [x] Raw data loading infrastructure
 - [x] Data dictionary structure
 
-### **🔄 In Progress / Required**
+### In Progress or Required
 
 | Task | Status | Notes |
 |------|--------|-------|
-| **03_eda.ipynb** | ⏳ Needed | Exploratory visualizations & distributions |
-| **04_statistical_analysis.ipynb** | ⏳ Needed | Hypothesis testing & predictive models |
-| **05_final_load_prep.ipynb** | ⏳ Needed | KPI computation & Tableau export |
-| **Tableau Dashboard** | ⏳ Needed | Interactive visualization of all KPIs |
-| **Project Report** | ⏳ Needed | Statistical findings & business insights |
-| **Presentation** | ⏳ Needed | Executive summary for stakeholders |
-| **Data Dictionary** | ⏳ Needed | Document all fields, transformations, definitions |
+| 03_eda.ipynb | Needed | Exploratory visualizations and distributions |
+| 04_statistical_analysis.ipynb | Needed | Hypothesis testing and predictive models |
+| 05_final_load_prep.ipynb | Needed | KPI computation and Tableau export |
+| Tableau Dashboard | Needed | Interactive visualization of all KPIs |
+| Project Report | Needed | Statistical findings and business insights |
+| Presentation | Needed | Executive summary for stakeholders |
+| Data Dictionary | Needed | Document all fields, transformations, definitions |
 
-### **📊 Analysis Gap Analysis**
+### Analysis Gap Summary
 
-**What We Have:**
+What We Have
 - ✓ 37,784 cleaned player records
 - ✓ 828 unique matches
 - ✓ 83 teams across 20 World Cups
 - ✓ 100% data quality (zero nulls)
 
-**What We Need:**
+What We Need
 1. **Visualizations** (EDA)
    - Distribution plots, time series, scatter plots
    - Correlation heatmaps
@@ -381,14 +394,14 @@ jupyter lab
 
 ---
 
-## Key Insights (Summary)
+## Key Insights Summary
 
-See `reports/project_report.pdf` for full analysis. Dashboard: see `tableau/dashboard_links.md`.
+See reports/project_report.pdf for full analysis. Dashboard: see tableau/dashboard_links.md.
 
-**Preliminary Findings (from test.py):**
-- **Home Advantage Confirmed:** 56.8% home win rate vs 20.7% away win rate
-- **Scoring Trends:** Avg 2.82 goals/match, highest in knockout stages
-- **Attendance:** Averages 45,429, peaks in finals (173,850)
-- **Player Consistency:** Only 5% of players score; 1,879 total scorers across 37,784 records
-- **Team Diversity:** 83 teams with varying tournament appearances
-- **Disciplinary Risk:** 2,298 yellows (highest in later decades)
+Current analysis takeaways:
+- The dataset is clean and ready for analysis with 37,784 rows and no nulls.
+- Attendance has grown strongly over time, from 590,549 in 1930 to 3,386,810 in 2014.
+- Average attendance per match increased from about 32.8k in 1930 to about 52.9k in 2014.
+- There are 83 teams, 151 venues, and 20 tournaments in scope.
+- The merged dataset is player-level, so match outcome counts should be interpreted carefully and validated again at unique-match level before final conclusions.
+- The most important next work is EDA, statistical testing, KPI export, dashboard creation, and report writing.
