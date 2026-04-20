@@ -20,7 +20,7 @@ Which factors — home advantage, match stage, team historical performance, and 
 | WorldCupMatches.csv | 4,572 | 20 | Match-level data with scores, attendance, referees |
 | WorldCups.csv | 20 | 10 | Tournament-level summary per edition |
 
-**Primary analytical dataset:** `data/processed/wc_schedule_analysis.csv` — a merged, cleaned dataset combining all three sources (37,784 rows × 15 columns), created by the ETL pipeline.
+**Primary analytical dataset:** `data/processed/wc_schedule_analysis.csv` — a merged, cleaned, and deduplicated dataset combining all three sources (6,039 rows × 15 columns), created by the ETL pipeline.
 
 **Source:** [Kaggle — FIFA World Cup](https://www.kaggle.com/datasets/abecklas/fifa-world-cup)
 
@@ -184,10 +184,10 @@ jupyter lab
 
 | Metric | Value |
 |--------|-------|
-| Total Records | 37,784 |
+| Total Records | 6,039 |
 | Null Values | 0 |
 | Data Consistency | 100% |
-| Memory Size | 22.66 MB |
+| Memory Size | 3.62 MB |
 
 ### Descriptive Analytics
 
@@ -199,29 +199,29 @@ jupyter lab
 #### Match Statistics
 | Outcome | Count | Notes |
 |---------|-------|-------|
-| Home Wins | 21,479 | Player-level records after merge |
-| Away Wins | 7,834 | Player-level records after merge |
-| Draws | 8,471 | Player-level records after merge |
+| Home Wins | 3,422 | Deduplicated player-level records |
+| Away Wins | 1,311 | Deduplicated player-level records |
+| Draws | 1,306 | Deduplicated player-level records |
 | **Total Unique Matches** | 828 | Use this for true match-level analysis |
 
 #### Goal Scoring
-- **Total Goals Scored:** 2,194
-- **Average Goals/Player:** 0.058
-- **Players with Goals:** 1,879 (5.0%)
+- **Total Goals Scored:** 1,716
+- **Average Goals/Player:** 0.284
+- **Players with Goals:** 1,421 (23.5%)
 - **Max Goals/Player:** 4
 - **Score Distribution:** 0-12 goals per match
 
 #### Disciplinary Records
-- **Yellow Cards:** 2,298 total (0.061 per player)
-- **Red Cards:** 169 total (0.0045 per player)
-- **Players with Yellows:** 2,194
-- **Players with Reds:** 169
+- **Yellow Cards:** 1,420 total (0.235 per player)
+- **Red Cards:** 160 total (0.026 per player)
+- **Players with Yellows:** 1,324
+- **Players with Reds:** 160
 
 #### Attendance Insights
-- **Average Attendance:** 45,429 spectators
+- **Average Attendance:** 45,908 spectators
 - **Maximum:** 173,850 (likely World Cup final)
 - **Minimum:** 2,000
-- **Attendance Std Dev:** 23,256 (high variability)
+- **Attendance Std Dev:** 23,019 (high variability)
 
 #### Attendance KPI Snapshot
 
@@ -327,6 +327,7 @@ File: notebooks/05_final_load_prep.ipynb
 ### Currently Complete
 - [x] Environment setup (Conda + requirements)
 - [x] ETL pipeline (extraction, cleaning, transformation)
+- [x] Exact duplicate removal from the final dataset
 - [x] Data validation & quality checks
 - [x] Raw data loading infrastructure
 - [x] Data dictionary structure
@@ -346,7 +347,7 @@ File: notebooks/05_final_load_prep.ipynb
 ### Analysis Gap Summary
 
 What We Have
-- ✓ 37,784 cleaned player records
+- ✓ 6,039 deduplicated player records
 - ✓ 828 unique matches
 - ✓ 83 teams across 20 World Cups
 - ✓ 100% data quality (zero nulls)
@@ -383,9 +384,9 @@ What We Need
 See reports/project_report.pdf for full analysis. Dashboard: see tableau/dashboard_links.md.
 
 Current analysis takeaways:
-- The dataset is clean and ready for analysis with 37,784 rows and no nulls.
+- The dataset is clean and ready for analysis with 6,039 deduplicated rows and no nulls.
 - Attendance has grown strongly over time, from 590,549 in 1930 to 3,386,810 in 2014.
 - Average attendance per match increased from about 32.8k in 1930 to about 52.9k in 2014.
 - There are 83 teams, 151 venues, and 20 tournaments in scope.
-- The merged dataset is player-level, so match outcome counts should be interpreted carefully and validated again at unique-match level before final conclusions.
+- The merged dataset is still player-level, so match outcome counts should be interpreted carefully and validated again at unique-match level before final conclusions.
 - The most important next work is EDA, statistical testing, KPI export, dashboard creation, and report writing.
