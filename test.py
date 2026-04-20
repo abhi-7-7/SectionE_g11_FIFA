@@ -6,12 +6,18 @@ Purpose: Validate cleaned dataset quality, integrity, and prepare for analysis
 Run with: python test.py
 """
 
-import argparse
-from pathlib import Path
-
 import pandas as pd
 import numpy as np
 import os
+from pathlib import Path
+
+
+EXPECTED_COLUMNS = [
+    'Year', 'Stage', 'Home_Team', 'Away_Team', 'Attendance',
+    'Total_Goals', 'Match_Result', 'Win_Conditions', 'Venue_City',
+    'Host_Nation', 'Player_Team', 'Lineup',
+    'Goals_Scored', 'Yellow_Cards', 'Red_Cards',
+]
 
 
 class DataValidator:
@@ -22,7 +28,7 @@ class DataValidator:
 
         self.df = pd.read_csv(self.processed_path)
         self.report = {}
-        self.duplicate_summary = {}
+        self.schema_report = {}
         
     def validate_all(self):
         """Run all validation checks"""
@@ -31,6 +37,7 @@ class DataValidator:
         print('='*70 + '\n')
         
         self.check_structure()
+        self.check_schema()
         self.check_nulls()
         self.check_dtypes()
         self.check_duplicates()
@@ -54,6 +61,34 @@ class DataValidator:
             'columns': self.df.shape[1],
             'memory_mb': round(self.df.memory_usage(deep=True).sum() / 1024**2, 2)
         }
+        print()
+
+    def check_schema(self):
+        """Verify expected columns and order"""
+        print('🧩 SCHEMA CHECK')
+        print('-' * 70)
+
+        actual_columns = list(self.df.columns)
+        missing = [col for col in EXPECTED_COLUMNS if col not in actual_columns]
+        extra = [col for col in actual_columns if col not in EXPECTED_COLUMNS]
+
+        print(f'  Expected Columns: {len(EXPECTED_COLUMNS)}')
+        print(f'  Actual Columns:   {len(actual_columns)}')
+        print(f'  Missing Columns:   {missing if missing else "None"}')
+        print(f'  Extra Columns:     {extra if extra else "None"}')
+
+        self.schema_report = {
+            'expected': EXPECTED_COLUMNS,
+            'actual': actual_columns,
+            'missing': missing,
+            'extra': extra,
+            'matches_expected': not missing and not extra,
+        }
+
+        if missing or extra:
+            raise ValueError(f'Schema mismatch detected. Missing: {missing}, Extra: {extra}')
+
+        print('  ✓ Schema matches the expected combined dataset')
         print()
     
     def check_nulls(self):
@@ -107,26 +142,19 @@ class DataValidator:
             print('  Sample duplicates:')
             print(self.df[self.df.duplicated(keep=False)].head(3).to_string(index=False))
 
-        # Check whether rows repeat by match-level identity rather than full-row identity
-        match_key_cols = ['Year', 'Stage', 'Home_Team', 'Away_Team', 'Venue_City']
-        player_key_cols = ['Year', 'Stage', 'Home_Team', 'Away_Team', 'Player_Team', 'Lineup']
-        match_dupes = int(self.df.duplicated(subset=match_key_cols).sum())
-        player_dupes = int(self.df.duplicated(subset=player_key_cols).sum())
+        match_keys = ['Year', 'Stage', 'Home_Team', 'Away_Team', 'Venue_City']
+        player_keys = ['Year', 'Stage', 'Home_Team', 'Away_Team', 'Player_Team', 'Lineup']
+        match_level_repeats = int(self.df.duplicated(subset=match_keys).sum())
+        player_level_repeats = int(self.df.duplicated(subset=player_keys).sum())
 
-        self.duplicate_summary = {
-            'exact': exact_duplicates,
-            'match_level': match_dupes,
-            'player_level': player_dupes,
-        }
-
-        print(f'  Match-level repeats:  {match_dupes:,} using {match_key_cols}')
-        print(f'  Player-level repeats: {player_dupes:,} using {player_key_cols}')
+        print(f'  Match-level repeats:  {match_level_repeats:,} using {match_keys}')
+        print(f'  Player-level repeats: {player_level_repeats:,} using {player_keys}')
 
         self.report['duplicates'] = {
-            'count': exact_duplicates,
+            'exact': exact_duplicates,
+            'match_level': match_level_repeats,
+            'player_level': player_level_repeats,
             'is_clean': exact_duplicates == 0,
-            'match_level': match_dupes,
-            'player_level': player_dupes,
         }
         print()
     
@@ -161,16 +189,6 @@ class DataValidator:
         """Check logical consistency"""
         print('🎯 DATA CONSISTENCY CHECKS')
         print('-' * 70)
-
-        required_columns = [
-            'Year', 'Stage', 'Home_Team', 'Away_Team', 'Attendance',
-            'Total_Goals', 'Match_Result', 'Win_Conditions', 'Venue_City',
-            'Host_Nation', 'Player_Team', 'Lineup', 'Goals_Scored',
-            'Yellow_Cards', 'Red_Cards'
-        ]
-        missing_columns = [col for col in required_columns if col not in self.df.columns]
-        if missing_columns:
-            raise ValueError(f'Missing required columns: {missing_columns}')
         
         # Year range
         year_valid = (self.df['Year'] >= 1930) & (self.df['Year'] <= 2026)
@@ -333,21 +351,17 @@ class DataValidator:
         print('\n')
 
 
-def parse_args():
-    parser = argparse.ArgumentParser(description='Validate the FIFA World Cup cleaned dataset.')
-    parser.add_argument(
-        '--input',
-        default='data/processed/wc_schedule_analysis.csv',
-        help='Path to the processed CSV file',
-    )
-    return parser.parse_args()
-
-
 def main():
-    args = parse_args()
-
+    # Validate the existing combined dataset
+    processed_file = Path('data/processed/wc_schedule_analysis.csv')
+    
+    if not processed_file.exists():
+        print(f'❌ ERROR: {processed_file} not found!')
+        print('   Please run: python scripts/etl_pipeline.py')
+        return
+    
     # Run validation
-    validator = DataValidator(args.input)
+    validator = DataValidator(processed_file)
     report = validator.validate_all()
     
     return report
