@@ -83,11 +83,58 @@ SectionE_g11_FIFA/
 
 ---
 
+## Setup & Installation
+
+### Prerequisites
+- [Conda](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html) or [Anaconda](https://www.anaconda.com/download/) installed
+
+### Option 1: Using Conda (Recommended)
+
+```bash
+# Clone the repository
+git clone https://github.com/Anugra07/SectionE_g11_FIFA.git
+cd SectionE_g11_FIFA
+
+# Create Conda environment from environment.yml
+conda env create -f environment.yml
+
+# Activate the environment
+conda activate sectione_fifa
+
+# Verify installation
+python --version  # Should show Python 3.11.x
+```
+
+### Option 2: Using pip with requirements.txt
+
+```bash
+# Clone the repository
+git clone https://github.com/Anugra07/SectionE_g11_FIFA.git
+cd SectionE_g11_FIFA
+
+# Create virtual environment (optional but recommended)
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
+```
+
+### Deactivate Environment
+
+```bash
+conda deactivate  # For Conda
+# or
+deactivate  # For pip virtual environment
+```
+
+---
+
 ## How to Run
 
 ```bash
-# Install dependencies
-pip install pandas numpy matplotlib seaborn scipy scikit-learn jupyter
+# Make sure environment is activated
+conda activate sectione_fifa
 
 # Run notebooks in order
 jupyter notebook notebooks/01_extraction.ipynb
@@ -98,6 +145,9 @@ jupyter notebook notebooks/05_final_load_prep.ipynb
 
 # Or run the standalone ETL pipeline
 python scripts/etl_pipeline.py
+
+# Launch JupyterLab for interactive analysis
+jupyter lab
 ```
 
 ---
