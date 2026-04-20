@@ -8,7 +8,6 @@ Run with: python test.py
 
 import pandas as pd
 import numpy as np
-import os
 from pathlib import Path
 
 
@@ -27,8 +26,10 @@ class DataValidator:
             raise FileNotFoundError(f'{self.processed_path} not found')
 
         self.df = pd.read_csv(self.processed_path)
+        self.raw_path = Path('data/raw')
         self.report = {}
         self.schema_report = {}
+        self.before_after_report = {}
         
     def validate_all(self):
         """Run all validation checks"""
@@ -36,6 +37,7 @@ class DataValidator:
         print('FIFA WORLD CUP DATA QUALITY REPORT')
         print('='*70 + '\n')
         
+        self.show_before_after_cleaning_metrics()
         self.check_structure()
         self.check_schema()
         self.check_nulls()
@@ -47,6 +49,58 @@ class DataValidator:
         self.print_summary()
         
         return self.report
+
+    def show_before_after_cleaning_metrics(self):
+        """Show high-level dataset metrics before cleaning vs after cleaning"""
+        print('🧪 BEFORE vs AFTER CLEANING METRICS')
+        print('-' * 70)
+
+        if not self.raw_path.exists():
+            print(f'  Raw path not found: {self.raw_path}')
+            print('  Skipping before-cleaning comparison.\n')
+            return
+
+        cups_raw = pd.read_csv(self.raw_path / 'WorldCups.csv')
+        matches_raw = pd.read_csv(self.raw_path / 'WorldCupMatches.csv')
+        players_raw = pd.read_csv(self.raw_path / 'WorldCupPlayers.csv')
+
+        before = {
+            'raw_players_rows': len(players_raw),
+            'raw_matches_rows': len(matches_raw),
+            'raw_cups_rows': len(cups_raw),
+            'raw_matches_empty_rows': int(matches_raw.isna().all(axis=1).sum()),
+            'raw_matches_duplicate_matchid': int(matches_raw.dropna(subset=['MatchID']).duplicated(subset=['MatchID']).sum()),
+            'raw_total_nulls': int(players_raw.isna().sum().sum() + matches_raw.isna().sum().sum() + cups_raw.isna().sum().sum()),
+        }
+
+        after = {
+            'processed_rows': len(self.df),
+            'processed_columns': self.df.shape[1],
+            'processed_exact_duplicates': int(self.df.duplicated().sum()),
+            'processed_total_nulls': int(self.df.isna().sum().sum()),
+            'processed_unique_matches': int(self.df[['Year', 'Stage', 'Home_Team', 'Away_Team']].drop_duplicates().shape[0]),
+            'processed_unique_teams': int(len(set(self.df['Home_Team'].unique()) | set(self.df['Away_Team'].unique()))),
+        }
+
+        self.before_after_report = {'before': before, 'after': after}
+        self.report['before_after'] = self.before_after_report
+
+        print('  Before Cleaning:')
+        print(f"    - Raw players rows:             {before['raw_players_rows']:,}")
+        print(f"    - Raw matches rows:             {before['raw_matches_rows']:,}")
+        print(f"    - Raw cups rows:                {before['raw_cups_rows']:,}")
+        print(f"    - Empty rows in matches:        {before['raw_matches_empty_rows']:,}")
+        print(f"    - Duplicate MatchID rows:       {before['raw_matches_duplicate_matchid']:,}")
+        print(f"    - Total nulls (all raw files):  {before['raw_total_nulls']:,}")
+
+        print('  After Cleaning:')
+        print(f"    - Processed rows:               {after['processed_rows']:,}")
+        print(f"    - Processed columns:            {after['processed_columns']:,}")
+        print(f"    - Exact duplicate rows:         {after['processed_exact_duplicates']:,}")
+        print(f"    - Total nulls:                  {after['processed_total_nulls']:,}")
+        print(f"    - Unique matches:               {after['processed_unique_matches']:,}")
+        print(f"    - Unique teams:                 {after['processed_unique_teams']:,}")
+        print()
     
     def check_structure(self):
         """Verify dataset structure"""
