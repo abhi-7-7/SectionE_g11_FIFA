@@ -6,16 +6,23 @@ Purpose: Validate cleaned dataset quality, integrity, and prepare for analysis
 Run with: python test.py
 """
 
+import argparse
+from pathlib import Path
+
 import pandas as pd
 import numpy as np
 import os
-from pathlib import Path
 
 
 class DataValidator:
     def __init__(self, processed_path='data/processed/wc_schedule_analysis.csv'):
-        self.df = pd.read_csv(processed_path)
+        self.processed_path = Path(processed_path)
+        if not self.processed_path.exists():
+            raise FileNotFoundError(f'{self.processed_path} not found')
+
+        self.df = pd.read_csv(self.processed_path)
         self.report = {}
+        self.duplicate_summary = {}
         
     def validate_all(self):
         """Run all validation checks"""
@@ -92,17 +99,35 @@ class DataValidator:
         print('🔄 DUPLICATE RECORDS CHECK')
         print('-' * 70)
         
-        duplicates = self.df.duplicated().sum()
-        if duplicates == 0:
-            print('  ✓ No duplicate rows found')
+        exact_duplicates = int(self.df.duplicated().sum())
+        if exact_duplicates == 0:
+            print('  ✓ No exact duplicate rows found')
         else:
-            print(f'  ⚠️  Found {duplicates} duplicate rows')
-            # Show sample duplicates
-            if duplicates > 0:
-                print('  Sample duplicates:')
-                print(self.df[self.df.duplicated(keep=False)].head(3))
-        
-        self.report['duplicates'] = {'count': int(duplicates), 'is_clean': duplicates == 0}
+            print(f'  ⚠️  Found {exact_duplicates} exact duplicate rows')
+            print('  Sample duplicates:')
+            print(self.df[self.df.duplicated(keep=False)].head(3).to_string(index=False))
+
+        # Check whether rows repeat by match-level identity rather than full-row identity
+        match_key_cols = ['Year', 'Stage', 'Home_Team', 'Away_Team', 'Venue_City']
+        player_key_cols = ['Year', 'Stage', 'Home_Team', 'Away_Team', 'Player_Team', 'Lineup']
+        match_dupes = int(self.df.duplicated(subset=match_key_cols).sum())
+        player_dupes = int(self.df.duplicated(subset=player_key_cols).sum())
+
+        self.duplicate_summary = {
+            'exact': exact_duplicates,
+            'match_level': match_dupes,
+            'player_level': player_dupes,
+        }
+
+        print(f'  Match-level repeats:  {match_dupes:,} using {match_key_cols}')
+        print(f'  Player-level repeats: {player_dupes:,} using {player_key_cols}')
+
+        self.report['duplicates'] = {
+            'count': exact_duplicates,
+            'is_clean': exact_duplicates == 0,
+            'match_level': match_dupes,
+            'player_level': player_dupes,
+        }
         print()
     
     def check_value_ranges(self):
@@ -136,6 +161,16 @@ class DataValidator:
         """Check logical consistency"""
         print('🎯 DATA CONSISTENCY CHECKS')
         print('-' * 70)
+
+        required_columns = [
+            'Year', 'Stage', 'Home_Team', 'Away_Team', 'Attendance',
+            'Total_Goals', 'Match_Result', 'Win_Conditions', 'Venue_City',
+            'Host_Nation', 'Player_Team', 'Lineup', 'Goals_Scored',
+            'Yellow_Cards', 'Red_Cards'
+        ]
+        missing_columns = [col for col in required_columns if col not in self.df.columns]
+        if missing_columns:
+            raise ValueError(f'Missing required columns: {missing_columns}')
         
         # Year range
         year_valid = (self.df['Year'] >= 1930) & (self.df['Year'] <= 2026)
@@ -298,17 +333,21 @@ class DataValidator:
         print('\n')
 
 
+def parse_args():
+    parser = argparse.ArgumentParser(description='Validate the FIFA World Cup cleaned dataset.')
+    parser.add_argument(
+        '--input',
+        default='data/processed/wc_schedule_analysis.csv',
+        help='Path to the processed CSV file',
+    )
+    return parser.parse_args()
+
+
 def main():
-    # Check if processed file exists
-    processed_file = 'data/processed/wc_schedule_analysis.csv'
-    
-    if not os.path.exists(processed_file):
-        print(f'❌ ERROR: {processed_file} not found!')
-        print('   Please run: python scripts/etl_pipeline.py')
-        return
-    
+    args = parse_args()
+
     # Run validation
-    validator = DataValidator(processed_file)
+    validator = DataValidator(args.input)
     report = validator.validate_all()
     
     return report
