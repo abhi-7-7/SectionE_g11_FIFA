@@ -105,27 +105,11 @@ conda activate sectione_fifa
 python --version  # Should show Python 3.11.x
 ```
 
-### Option 2: Using pip with requirements.txt
+### Activate or Deactivate the Conda Environment
 
 ```bash
-# Clone the repository
-git clone https://github.com/Anugra07/SectionE_g11_FIFA.git
-cd SectionE_g11_FIFA
-
-# Create virtual environment (optional but recommended)
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-
-# Install dependencies
-pip install -r requirements.txt
-```
-
-### Deactivate Environment
-
-```bash
-conda deactivate  # For Conda
-# or
-deactivate  # For pip virtual environment
+conda activate sectione_fifa
+conda deactivate
 ```
 
 ---
