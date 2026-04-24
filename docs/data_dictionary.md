@@ -18,7 +18,7 @@ and four KPI tables for analysis and Tableau dashboarding.
 | `WorldCupMatches.csv` | `data/raw/` | 4,572 (836 real) | 20 | One row per match |
 | `WorldCupPlayers.csv` | `data/raw/` | 37,784 | 9 | One row per player per match |
 | `WorldCups.csv` | `data/raw/` | 20 | 10 | One row per tournament edition |
-| `world_cup_master.csv` | `data/processed/` | 37,048 | 37 | One row per player per match per tournament |
+| `world_cup_master.csv` | `data/processed/` | 36,595 | 37 | One row per player per match per tournament |
 | `kpi_tournament.csv` | `data/processed/` | 20 | 15 | One row per tournament edition |
 | `kpi_team.csv` | `data/processed/` | 83 | 12 | One row per nation (all-time) |
 | `kpi_player.csv` | `data/processed/` | 7,638 | 14 | One row per player (all-time) |
@@ -45,13 +45,13 @@ The checksums below confirm the raw files were never modified after download.
 WorldCupPlayers  (37,784 rows)
     └── LEFT JOIN WorldCupMatches   ON  RoundID + MatchID
             └── LEFT JOIN WorldCups  ON  Year
-                    └──> world_cup_master.csv  (37,048 rows × 37 cols)
+                    └──> world_cup_master.csv  (36,595 rows × 37 cols)
 ```
 
 **Why LEFT JOIN?** We keep all player records as the base. Match and tournament
 context is added where keys match. No player records are lost.
 
-**Why 37,048 rows and not 37,784?** 736 duplicate rows were removed from
+**Why 36,595 rows and not 37,784?** 736 duplicate rows were removed from
 `WorldCupPlayers` during cleaning.
 
 ---
@@ -90,7 +90,7 @@ context is added where keys match. No player records are lost.
 ## Section 2 — Raw File: `WorldCupPlayers.csv`
 
 **Grain:** One row per player per match  
-**Rows:** 37,784 raw → 37,048 after cleaning  
+**Rows:** 37,784 raw → 36,595 after cleaning  
 **Join keys:** `RoundID`, `MatchID` → link to `WorldCupMatches.csv`
 
 | # | Column | Raw Type | Clean Type | Nullable | Sample Values | Description | Known Issues & Fix |
@@ -143,7 +143,7 @@ context is added where keys match. No player records are lost.
 ## Section 4 — Processed File: `world_cup_master.csv`
 
 **Grain:** One row per player per match per tournament  
-**Rows:** 37,048 | **Columns:** 37  
+**Rows:** 36,595 | **Columns:** 37  
 **Produced by:** `02_cleaning.ipynb` and `scripts/etl_pipeline.py`
 
 This is the single analytical dataset used by all downstream notebooks (03, 04, 05).
