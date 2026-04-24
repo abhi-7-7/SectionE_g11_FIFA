@@ -51,8 +51,7 @@ WorldCupPlayers  (37,784 rows)
 **Why LEFT JOIN?** We keep all player records as the base. Match and tournament
 context is added where keys match. No player records are lost.
 
-**Why 36,595 rows and not 37,784?** 736 duplicate rows were removed from
-`WorldCupPlayers` during cleaning.
+**Why 36,595 rows and not 37,784?** 736 duplicate records were removed from WorldCupPlayers during data cleaning, and 454 rows with null (NaT) datetime values were dropped.
 
 ---
 
