@@ -1,1 +1,3 @@
-Dashboard1 - https://public.tableau.com/app/profile/shivansh.tiwari6428/viz/ENDSEM_DASHBOARD/Dashboard1
+Tableau Dashboard 1 - https://public.tableau.com/app/profile/yuvraj.chandravansi/viz/Book1_17772021942740/Dashboard1
+Tableau Dashboard 2 - https://public.tableau.com/views/FIFAWorldCupAnalytics_17772919367130/MatchAnalytics?:language=en-US&publish=yes&:sid=&:redirect=auth&:display_count=n&:origin=viz_share_link
+Tableau Dashboard 3 - https://public.tableau.com/app/profile/shivansh.tiwari6428/viz/ENDSEM_DASHBOARD/Dashboard1
